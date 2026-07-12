@@ -25,3 +25,30 @@ def create_task(title: str, description: str = None, db: Session = Depends(get_d
 def get_all_tasks(db: Session = Depends(get_db)):
     tasks = db.query(models.Task).all()
     return tasks
+
+# 1. Update Route: Task ko complete mark karne ya title badalne ke liye
+@app.put("/tasks/{task_id}")
+def update_task(task_id: int, title: str = None, is_completed: bool = None, db: Session = Depends(get_db)):
+    task = db.query(models.Task).filter(models.Task.id == task_id).first()
+    if not task:
+        return {"error": "Task nahi mila!"}
+    
+    if title is not None:
+        task.title = title
+    if is_completed is not None:
+        task.is_completed = is_completed
+        
+    db.commit()
+    db.refresh(task)
+    return {"message": "Task update ho gaya!", "task": task}
+
+# 2. Delete Route: Task ko database se hatane ke liye
+@app.delete("/tasks/{task_id}")
+def delete_task(task_id: int, db: Session = Depends(get_db)):
+    task = db.query(models.Task).filter(models.Task.id == task_id).first()
+    if not task:
+        return {"error": "Task nahi mila!"}
+        
+    db.delete(task)
+    db.commit()
+    return {"message": f"Task ID {task_id} successfully delete ho gaya!"}
