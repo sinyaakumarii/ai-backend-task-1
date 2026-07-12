@@ -19,3 +19,9 @@ def create_task(title: str, description: str = None, db: Session = Depends(get_d
     db.commit()
     db.refresh(new_task)
     return {"message": "Task created successfully!", "task": new_task}
+
+# Saare tasks ko database se lekar aane ke liye GET route
+@app.get("/tasks")
+def get_all_tasks(db: Session = Depends(get_db)):
+    tasks = db.query(models.Task).all()
+    return tasks
